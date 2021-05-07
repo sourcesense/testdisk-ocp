@@ -1,0 +1,53 @@
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: testdisk-ocp
+spec:
+  #storageClassName: ssd
+  # storageClassName: gp2
+  # storageClassName: local-storage
+  # storageClassName: ibmc-block-bronze
+  # storageClassName: ibmc-block-silver
+  # storageClassName: ibmc-block-gold
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+kind: "DeploymentConfig"
+apiVersion: "v1"
+metadata:
+  name: "testdisk-ocp"
+spec:
+  template: 
+    metadata:
+      labels:
+        name: "testdisk-ocp"
+    spec:
+      containers:
+        - name: "testdisk-ocp"
+          image: "sourcesense/testdisk-ocp"
+          imagePullPolicy: Always
+          volumeMounts:
+          - name: data-volume
+            mountPath: /data
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: testdisk-ocp
+  replicas: 1 
+  selector:
+    name: "testdisk-ocp"
+  triggers:
+    - type: "ImageChange" 
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - "testdisk-ocp"
+        from:
+          kind: "ImageStreamTag"
+          name: "testdisk-ocp:latest"
+  strategy: 
+    type: "Rolling"
