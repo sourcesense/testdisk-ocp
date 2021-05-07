@@ -16,38 +16,27 @@ spec:
     requests:
       storage: 1Gi
 ---
-kind: "DeploymentConfig"
-apiVersion: "v1"
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: "testdisk-ocp"
+  name: testdisk-ocp
 spec:
-  template: 
+  replicas: 1
+  selector:
+    matchLabels:
+      app: testdisk-ocp
+  template:
     metadata:
       labels:
-        name: "testdisk-ocp"
+        app: testdisk-ocp
     spec:
       containers:
-        - name: "testdisk-ocp"
-          image: "sourcesense/testdisk-ocp"
-          imagePullPolicy: Always
-          volumeMounts:
-          - name: data-volume
-            mountPath: /data
+      - name: testdisk-ocp
+        image: "docker.io/sourcesense/testdisk-ocp:latest"
+        volumeMounts:
+        - name: data-volume
+          mountPath: /data
       volumes:
       - name: data-volume
         persistentVolumeClaim:
           claimName: testdisk-ocp
-  replicas: 1 
-  selector:
-    name: "testdisk-ocp"
-  triggers:
-    - type: "ImageChange" 
-      imageChangeParams:
-        automatic: true
-        containerNames:
-          - "testdisk-ocp"
-        from:
-          kind: "ImageStreamTag"
-          name: "testdisk-ocp:latest"
-  strategy: 
-    type: "Rolling"
