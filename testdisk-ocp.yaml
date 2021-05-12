@@ -36,7 +36,13 @@ spec:
         volumeMounts:
         - name: data-volume
           mountPath: /data
+        - name: ocs-fio-config
+          mountPath: /tmp/
       volumes:
       - name: data-volume
         persistentVolumeClaim:
           claimName: testdisk-ocp
+      - name: ocs-fio-config
+        configMap:
+          name: ocs-fio-config
+          defaultMode: 420
